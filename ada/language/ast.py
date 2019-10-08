@@ -6585,8 +6585,6 @@ class GenericSubpDecl(GenericDecl):
     """
     Generic subprogram declaration.
     """
-    env_spec = child_unit(Entity.name_symbol,
-                          Self.subp_decl.subp_spec.name.parent_scope)
 
     subp_decl = Field(type=T.GenericSubpInternal)
     aspects = NullField()
