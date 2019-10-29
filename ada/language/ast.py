@@ -243,6 +243,11 @@ class AdaNode(ASTNode):
         public=True
     )
 
+    @langkit_property(return_type=LogicVar, external=True,
+                      uses_envs=False, uses_entity_info=False)
+    def create_logic_var():
+        pass
+
     @langkit_property(return_type=T.String)
     def custom_id_text():
         """
@@ -6679,8 +6684,14 @@ class Expr(AdaNode):
     """
     Base class for expressions.
     """
+    @langkit_property(return_type=LogicVar, memoized=True)
+    def type_var():
+        """
+        This field is the logic variable for this node. It is not used directly,
+        instead being retrieved via the ref_var property
+        """
+        return Self.create_logic_var
 
-    type_var = UserField(LogicVar, public=False)
     type_val = Property(Self.type_var.get_value)
 
     expression_type = Property(
@@ -8112,7 +8123,13 @@ class CallExpr(Name):
 
     ref_var = Property(Self.name.ref_var)
 
-    r_called_spec = UserField(LogicVar, public=False)
+    @langkit_property(return_type=LogicVar, memoized=True)
+    def r_called_spec():
+        """
+        This field is the logic variable for this node. It is not used directly,
+        instead being retrieved via the ref_var property
+        """
+        return Self.create_logic_var
 
     subp_spec_var = Property(Self.r_called_spec)
     defines_subp_spec_var = Property(True)
@@ -8618,7 +8635,13 @@ class ExplicitDeref(Name):
     prefix = Field(type=T.Name)
     ref_var = Property(Self.prefix.ref_var)
 
-    r_called_spec = UserField(LogicVar, public=False)
+    @langkit_property(return_type=LogicVar, memoized=True)
+    def r_called_spec():
+        """
+        This field is the logic variable for this node. It is not used directly,
+        instead being retrieved via the ref_var property
+        """
+        return Self.create_logic_var
 
     subp_spec_var = Property(Self.r_called_spec)
     defines_subp_spec_var = Property(True)
@@ -8792,15 +8815,23 @@ class SingleTokNode(Name):
 
     relative_name = Property(Entity)
 
-    r_ref_var = UserField(LogicVar, public=False)
-    """
-    This field is the logic variable for this node. It is not used directly,
-    instead being retrieved via the ref_var property
-    """
+    @langkit_property(return_type=LogicVar, memoized=True)
+    def r_ref_var():
+        """
+        This field is the logic variable for this node. It is not used directly,
+        instead being retrieved via the ref_var property
+        """
+        return Self.create_logic_var
 
     ref_var = Property(Self.r_ref_var)
 
-    r_called_spec = UserField(LogicVar, public=False)
+    @langkit_property(return_type=LogicVar, memoized=True)
+    def r_called_spec():
+        """
+        This field is the logic variable for this node. It is not used directly,
+        instead being retrieved via the ref_var property
+        """
+        return Self.create_logic_var
 
     subp_spec_var = Property(Self.r_called_spec)
     defines_subp_spec_var = Property(True)
@@ -10197,7 +10228,14 @@ class AttributeRef(Name):
     args = Field(type=T.AdaNode)
 
     ref_var = Property(Self.r_ref_var)
-    r_ref_var = UserField(type=LogicVar, public=False)
+
+    @langkit_property(return_type=LogicVar, memoized=True)
+    def r_ref_var():
+        """
+        This field is the logic variable for this node. It is not used directly,
+        instead being retrieved via the ref_var property
+        """
+        return Self.create_logic_var
 
     relative_name = Property(Entity.prefix.relative_name)
 

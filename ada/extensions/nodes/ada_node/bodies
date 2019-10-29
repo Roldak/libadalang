@@ -36,6 +36,16 @@ begin
       Rule     => Default_Grammar_Rule);
 end Ada_Node_P_Standard_Unit;
 
+
+function Ada_Node_P_Create_Logic_Var
+  (Node : Bare_Ada_Node) return Logic_Var is
+   V : Logic_Var := Eq_Node.Refs.Create;
+begin
+   V.Dbg_Name := new String'("X");
+   return V;
+end Ada_Node_P_Create_Logic_Var;
+
+
 --------------------------------------
 -- Ada_Node_P_Filter_Is_Imported_By --
 --------------------------------------
