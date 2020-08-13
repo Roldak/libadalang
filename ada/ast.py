@@ -3853,7 +3853,9 @@ class BaseTypeDecl(BasicDecl):
         dynamic_vars=[default_origin()]
     )
 
-    is_classwide = Property(False)
+    is_classwide = Property(
+        False, doc="Whether type is a classwide type or not.", public=True
+    )
 
     is_access_type = Property(
         False, public=True,
