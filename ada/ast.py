@@ -4113,6 +4113,18 @@ class BaseTypeDecl(BasicDecl):
         No(T.BaseTypeDecl.entity.array), dynamic_vars=[origin]
     )
 
+    @langkit_property(public=True, return_type=T.BaseTypeDecl.entity.array,
+                      dynamic_vars=[default_origin()], memoized=True)
+    def ancestor_types():
+        """
+        Return all ancestor types of this type, that is, all its direct and
+        indirect base types.
+        """
+        base_types = Var(Entity.base_types)
+        return base_types.concat(base_types.mapcat(
+            lambda t: t.ancestor_types
+        ))
+
     @langkit_property(public=True, return_type=T.TypeDecl.entity.array,
                       dynamic_vars=[default_imprecise_fallback()])
     def find_all_derived_types(units=T.AnalysisUnit.array):
