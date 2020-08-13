@@ -1902,8 +1902,13 @@ class BasicDecl(AdaNode):
             lambda _: No(T.BaseTypeDecl.entity)
         )
 
-    @langkit_property(dynamic_vars=[origin], return_type=Int)
+    @langkit_property(dynamic_vars=[default_origin()], return_type=Int,
+                      public=True)
     def array_ndims():
+        """
+        If this designates an array type, return its number of dimensions.
+        Return 0 otherwise.
+        """
         return Entity.expr_type.array_ndims
 
     is_array = Property(Entity.array_ndims > 0, dynamic_vars=[origin])
