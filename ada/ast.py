@@ -9685,7 +9685,8 @@ class Name(Expr):
             ),
 
             # handle 'Access case
-            lambda a=T.AttributeRef: (a.prefix == Entity) & a.is_access_attr,
+            lambda a=T.AttributeRef:
+            (a.prefix == Entity) & a.is_access_attribute,
 
             lambda _: False
         )
@@ -12659,10 +12660,14 @@ class AttributeRef(Name):
             No(T.AdaNode.entity.array),
         )
 
-    is_access_attr = Property(
+    is_access_attribute = Property(
         Entity.attribute.name_symbol.any_of(
             'Access', 'Unchecked_Access', 'Unrestricted_Access'
-        )
+        ),
+        type=Bool, public=True, doc="""
+        Return whether this attribute is one of `Access`, `Unchecked_Access`
+        or `Unrestricted_Access`.
+        """
     )
 
     @langkit_property()
@@ -12671,7 +12676,7 @@ class AttributeRef(Name):
             Entity.attribute.name_is('Model'),
             Entity.designated_env_model_attr,
 
-            Entity.is_access_attr,
+            Entity.is_access_attribute,
             Entity.prefix.designated_env,
 
             Entity.attribute.name_is('Result'),
