@@ -4424,7 +4424,7 @@ class BaseTypeDecl(BasicDecl):
             )
         )
 
-    @langkit_property(return_type=Bool)
+    @langkit_property(return_type=Bool, public=True)
     def is_generic_formal():
         """
         Return whether this type declaration is a generic formal.
