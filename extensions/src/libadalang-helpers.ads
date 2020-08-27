@@ -191,7 +191,9 @@ package Libadalang.Helpers is
       --  App_Post_Process.
 
       with procedure App_Setup
-        (Context : App_Context; Jobs : App_Job_Context_Array) is null;
+        (Context : App_Context;
+         Jobs    : App_Job_Context_Array;
+         Files   : String_Vectors.Vector) is null;
       --  This procedure is called right after command line options are parsed,
       --  the project is loaded (if present) and the list of files to process
       --  is computed.

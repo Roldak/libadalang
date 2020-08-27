@@ -470,7 +470,7 @@ package body Libadalang.Helpers is
          --  files.
 
          Trace.Trace ("Setting up the app");
-         App_Setup (App_Ctx, Job_Contexts.all);
+         App_Setup (App_Ctx, Job_Contexts.all, Files);
 
          Trace.Trace ("Running jobs");
          declare
