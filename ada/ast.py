@@ -3810,8 +3810,7 @@ class BaseTypeDecl(BasicDecl):
                 has_not_null=T.NotNullAbsent.new(),
                 type_decl=Self
             ),
-            aspects=No(T.AspectSpec),
-            prims_env=No(T.LexicalEnv)
+            aspects=No(T.AspectSpec)
         ).cast(T.BaseTypeDecl).as_entity
 
     @langkit_property(return_type=T.BaseTypeDecl.entity)
@@ -4870,7 +4869,6 @@ class TypeDecl(BaseTypeDecl):
     discriminants = Field(type=T.DiscriminantPart)
     type_def = Field(type=T.TypeDef)
     aspects = Field(type=T.AspectSpec)
-    prims_env = UserField(type=T.LexicalEnv, public=False)
 
     is_iterable_type = Property(
         # TODO: Need to implement on:
