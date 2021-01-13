@@ -7479,16 +7479,21 @@ class GenericSubpInstantiation(GenericInstantiation):
     env_spec = EnvSpec(
         do(Self.env_hook),
 
-        set_initial_env(
-            env.bind(Self.default_initial_env, Let(
-                lambda scope=Self.as_bare_entity.defining_name.parent_scope:
-                If(scope == EmptyEnv, env, scope)
-            )),
-            unsound=True
+        set_initial_env_by_name(
+            Self.child_decl_initial_env_name,
+            Self.default_initial_env
+        ),
+
+        add_to_env_kv(
+            key=Entity.name_symbol,
+            val=Self,
+            resolver=T.GenericSubpInstantiation.designated_subp
         ),
 
         add_env(),
+
         do(Self.populate_dependent_units),
+
         reference(
             Self.top_level_use_package_clauses,
             through=T.Name.use_package_name_designated_env,
@@ -7519,13 +7524,7 @@ class GenericSubpInstantiation(GenericInstantiation):
                 )
             ),
             resolver=AdaNode.resolve_generic_actual,
-        ),
-        add_to_env_kv(
-            Entity.name_symbol, Self,
-            resolver=T.GenericSubpInstantiation.designated_subp,
-            dest_env=Self.node_env,
-            unsound=True,
-        ),
+        )
     )
 
 
@@ -7607,20 +7606,34 @@ class GenericPackageInstantiation(GenericInstantiation):
     def defining_env():
         return Entity.defining_env_impl
 
+    @langkit_property(return_type=T.Symbol)
+    def initial_env_name():
+        return If(
+            Self.is_library_item,
+            Self.child_decl_initial_env_name,
+            No(T.Symbol)
+        )
+
+    @langkit_property(return_type=T.Symbol.array)
+    def env_names():
+        return Self.top_level_env_name.then(
+            lambda fqn: fqn.to_symbol.singleton
+        )
+
     defining_names = Property(Entity.name.singleton)
 
     env_spec = EnvSpec(
         do(Self.env_hook),
 
-        set_initial_env(env.bind(
-            Self.default_initial_env,
-            If(Self.is_formal,
-               Self.default_initial_env,
-               Entity.decl_scope(False))
-        ), unsound=True),
+        set_initial_env_by_name(
+            Self.initial_env_name,
+            Self.default_initial_env
+        ),
 
         add_to_env_kv(Entity.name_symbol, Self),
-        add_env(),
+
+        add_env(names=Self.env_names),
+
         do(Self.populate_dependent_units),
         reference(
             Self.top_level_use_package_clauses,
@@ -8061,19 +8074,16 @@ class GenericSubpDecl(GenericDecl):
         # Call the env hook to parse eventual parent unit
         do(Self.env_hook),
 
-        set_initial_env(
-            env.bind(Self.default_initial_env, Entity.decl_scope),
-            unsound=True,
+        set_initial_env_by_name(
+            Self.child_decl_initial_env_name,
+            Self.default_initial_env
         ),
 
         add_to_env_kv(
-            Entity.name_symbol, Self,
-            dest_env=env.bind(
-                Self.default_initial_env,
-                Self.as_bare_entity.defining_name.parent_scope
-            ),
-            unsound=True,
+            key=Entity.name_symbol,
+            val=Self
         ),
+
         add_env(),
         do(Self.populate_dependent_units),
         reference(
@@ -8118,14 +8128,21 @@ class GenericPackageDecl(GenericDecl):
     """
     env_spec = EnvSpec(
         do(Self.env_hook),
-        set_initial_env(env.bind(Self.default_initial_env,
-                                 Self.initial_env(Entity.decl_scope)),
-                        unsound=True),
-        add_to_env(Self.env_assoc(
-            Entity.name_symbol,
-            env.bind(Self.parent.node_env, Entity.decl_scope(False))
-        ), unsound=True),
+
+        set_initial_env_by_name(
+            Self.child_decl_initial_env_name(True),
+            Self.default_initial_env
+        ),
+
+        add_to_env_by_name(
+            key=Entity.name_symbol,
+            val=Self,
+            name_expr=Self.child_decl_initial_env_name(False),
+            fallback_env_expr=Self.default_initial_env
+        ),
+
         add_env(),
+
         do(Self.populate_dependent_units),
         reference(
             Self.top_level_use_package_clauses,
