@@ -6348,8 +6348,7 @@ class UseClause(AdaNode):
     def initial_env_name():
         return Self.parent.parent.cast(CompilationUnit).then(
             lambda cu: Let(
-                lambda decl=cu.decl:
-                If(
+                lambda decl=cu.decl: If(
                     decl.is_library_item,
                     decl.child_decl_initial_env_name,
                     decl.cast_or_raise(Body).body_initial_env_name
@@ -6371,7 +6370,8 @@ class UsePackageClause(UseClause):
         ),
         reference(
             Self.packages.map(lambda n: n.cast(AdaNode)),
-            T.Name.use_package_name_designated_env
+            T.Name.use_package_name_designated_env,
+            cond=Not(Self.parent.parent.is_a(T.CompilationUnit))
         )
     )
 
@@ -6409,7 +6409,8 @@ class UseTypeClause(UseClause):
         ),
         reference(
             Self.types.map(lambda n: n.cast(AdaNode)),
-            T.Name.name_designated_type_env
+            T.Name.name_designated_type_env,
+            cond=Not(Self.parent.parent.is_a(T.CompilationUnit))
         ),
     )
 
@@ -7571,7 +7572,19 @@ class PackageDecl(BasePackageDecl):
 
         add_env(names=Self.env_names),
 
-        do(Self.populate_dependent_units)
+        do(Self.populate_dependent_units),
+
+        reference(
+            Self.top_level_use_package_clauses,
+            through=T.Name.use_package_name_designated_env,
+            cond=Self.parent.is_a(T.LibraryItem, T.Subunit)
+        ),
+
+        reference(
+            Self.top_level_use_type_clauses,
+            through=T.Name.name_designated_type_env,
+            cond=Self.parent.is_a(T.LibraryItem, T.Subunit)
+        ),
     )
 
 
@@ -14971,6 +14984,18 @@ class PackageBody(Body):
         add_env(transitive_parent=Self.is_library_item),
 
         do(Self.populate_dependent_units),
+
+        reference(
+            Self.top_level_use_package_clauses,
+            through=T.Name.use_package_name_designated_env,
+            cond=Self.parent.is_a(T.LibraryItem, T.Subunit)
+        ),
+
+        reference(
+            Self.top_level_use_type_clauses,
+            through=T.Name.name_designated_type_env,
+            cond=Self.parent.is_a(T.LibraryItem, T.Subunit)
+        ),
 
         reference(
             Self.cast(T.AdaNode)._.singleton,
