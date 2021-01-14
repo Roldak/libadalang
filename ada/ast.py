@@ -1297,6 +1297,13 @@ class BasicDecl(AdaNode):
                                 Not(p.is_a(BaseSubpBody))
                             )
                         )
+                    ),
+                    default_val=And(
+                        node.is_a(PrivatePart),
+                        node.parent.cast(BasicDecl).then(
+                            lambda bd:
+                            bd.has_top_level_env_name_impl(allow_bodies)
+                        )
                     )
                 ),
                 default_val=True
@@ -1365,6 +1372,14 @@ class BasicDecl(AdaNode):
             lambda node: node.cast(BasicDecl).then(
                 lambda bd: bd.has_top_level_env_name_impl(
                     allow_bodies=True
+                ),
+                default_val=And(
+                    node.is_a(PrivatePart),
+                    node.parent.cast(BasicDecl).then(
+                        lambda bd: bd.has_top_level_env_name_impl(
+                            allow_bodies=True
+                        )
+                    )
                 )
             ),
             default_val=True
@@ -1373,6 +1388,9 @@ class BasicDecl(AdaNode):
     @langkit_property(return_type=T.String)
     def syntactic_fqn_impl(first=(Bool, False)):
         self_env = Var(If(first, Self.children_env, Self.node_env))
+        bd = Var(self_env.env_node.cast(BasicDecl)._or(
+            self_env.env_node.cast(PrivatePart)._.parent.cast(BasicDecl)
+        ))
         return Cond(
             Self.is_compilation_unit_root,
             Self.sym_join(
@@ -1383,7 +1401,7 @@ class BasicDecl(AdaNode):
             Self.is_a(GenericPackageInternal, GenericSubpInternal),
             Self.parent.cast(BasicDecl).syntactic_fqn_impl,
 
-            self_env.env_node.cast(BasicDecl).then(
+            bd.then(
                 lambda bd:
                 bd.syntactic_fqn_impl
                     .concat(String("."))
