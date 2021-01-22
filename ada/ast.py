@@ -1441,7 +1441,7 @@ class BasicDecl(AdaNode):
         defining_name = Var(Self.as_bare_entity.defining_name)
         child_name = Var(defining_name.name.cast(DottedName))
         return Cond(
-            defining_name.name_is('standard'),
+            defining_name.text.to_symbol == 'standard',
             No(T.Symbol),
 
             Self.is_library_item,
