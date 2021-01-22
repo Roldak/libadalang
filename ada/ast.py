@@ -1864,7 +1864,13 @@ class BasicDecl(AdaNode):
             # 2. This potential generic body is a subunit. In that case,
             # similarly, the parent is the lexical parent of the stub part, and
             # we need to reference the generic formals.
-            Self.parent.is_a(Subunit)
+            Self.parent.is_a(Subunit),
+
+            # 3. This is the declaration of a subprogram body. In that case,
+            # we should add a reference to the generic formals even for
+            # library-level subprograms, because their parent is not their
+            # declaration.
+            Self.is_a(BaseSubpBody)
         )
 
     is_in_public_part = Property(Self.parent.parent.is_a(T.PublicPart))
