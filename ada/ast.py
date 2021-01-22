@@ -6825,13 +6825,15 @@ class BasicSubpDecl(BasicDecl):
         do(Self.env_hook),
 
         set_initial_env_by_name(
-            Self.child_decl_initial_env_name,
+            Self.child_decl_initial_env_name(True),
             Self.default_initial_env
         ),
 
-        add_to_env_kv(
+        add_to_env_by_name(
             key=Entity.name_symbol,
-            val=Self
+            val=Self,
+            name=Self.child_decl_initial_env_name(False),
+            fallback_env=Self.children_env
         ),
 
         add_env(names=Self.env_names),
@@ -14234,9 +14236,11 @@ class BaseSubpBody(Body):
             Self.default_initial_env
         ),
 
-        add_to_env_kv(
+        add_to_env_by_name(
             key=Entity.name_symbol,
-            val=Self
+            val=Self,
+            name=Self.initial_env_name(False),
+            fallback_env=Self.children_env
         ),
 
         add_to_env_by_name(
