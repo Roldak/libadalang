@@ -707,6 +707,22 @@ class AdaNode(ASTNode):
             )
             .env_node._.has_with_visibility(refd_unit),
 
+            # With clauses from a library level subprogram declaration are
+            # visible by its corresponding body. Since the decl is not the
+            # parent of the body, we must specifically take this case into
+            # account.
+            Self.top_level_decl(
+                Self.unit
+            ).as_bare_entity.cast(BaseSubpBody).then(
+                lambda b: If(
+                    b.is_library_item,
+                    b.defining_name.referenced_unit(UnitSpecification).then(
+                        lambda u: u.root._.has_with_visibility(refd_unit)
+                    ),
+                    False
+                )
+            ),
+
             # because of the GNAT kludge around the child packages of
             # Ada.Text_IO, always consider those to be visible. Otherwise it
             # will break any access to P.Integer_IO & co. for any package P
