@@ -343,7 +343,8 @@ class AdaNode(ASTNode):
         """
         return Entity.semantic_parent.then(
             lambda sp: If(
-                sp.is_a(GenericPackageInternal) | sp.is_a(GenericSubpInternal),
+                sp.is_a(GenericPackageInternal) | sp.is_a(GenericSubpInternal)
+                | sp.is_a(GenericPackageDecl) | sp.is_a(GenericSubpDecl),
                 Let(
                     lambda
                     inst=sp.info.rebindings._.new_env.env_node.cast(BasicDecl):
@@ -354,7 +355,10 @@ class AdaNode(ASTNode):
                     # rebinding in the returned entity.
                     Let(
                         lambda designated=If(
-                            sp.is_a(GenericPackageInternal),
+                            sp.is_a(
+                                GenericPackageInternal,
+                                GenericPackageDecl
+                            ),
 
                             inst.cast(GenericPackageInstantiation)
                             .as_bare_entity._.designated_package,
@@ -362,7 +366,8 @@ class AdaNode(ASTNode):
                             inst.cast(GenericSubpInstantiation)
                             .as_bare_entity._.designated_subp
                         ): If(
-                            designated.node == sp.node,
+                            Or(designated.node == sp.node,
+                               designated.node._.parent == sp.node),
                             T.BasicDecl.entity.new(
                                 node=inst,
                                 info=T.entity_info.new(
@@ -371,7 +376,11 @@ class AdaNode(ASTNode):
                                     from_rebound=False
                                 )
                             ),
-                            sp.parent.cast(T.BasicDecl)
+                            If(
+                                sp.is_a(GenericDecl),
+                                sp.cast(BasicDecl),
+                                sp.parent.cast(T.BasicDecl)
+                            )
                         )
                     )
                 ),
