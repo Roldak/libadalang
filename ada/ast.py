@@ -4177,7 +4177,12 @@ class BaseTypeDecl(BasicDecl):
         doc="If self has an Implicit_Dereference aspect, return its expression"
     )
 
-    access_def = Property(No(T.AccessDef.entity), dynamic_vars=[origin])
+    access_def = Property(
+        No(T.AccessDef.entity),
+        doc="For an access type or subtype, return its AccessDef",
+        dynamic_vars=[default_origin()],
+        public=True
+    )
 
     is_char_type = Property(
         False,
