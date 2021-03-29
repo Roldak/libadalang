@@ -9368,7 +9368,12 @@ class BaseAggregate(Expr):
         ))
 
         return type_constraint & Entity.ancestor_expr.then(
-            lambda ae: ae.sub_equation, default_val=LogicTrue()
+            lambda ae: If(
+                ae.cast(Name)._.name_designated_type.is_null,
+                ae.sub_equation,
+                ae.cast(Name).xref_no_overloading
+            ),
+            default_val=LogicTrue()
         ) & Entity.assocs.logic_all(
             lambda assoc: assoc.sub_equation
         )
