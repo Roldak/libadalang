@@ -5100,6 +5100,7 @@ class ClasswideTypeDecl(BaseTypeDecl):
     is_classwide = Property(True)
 
     is_tagged_type = Property(True)
+    base_subtype = Property(Entity.typedecl.base_subtype._.classwide_type)
     base_type = Property(Entity.typedecl.base_type)
     base_interfaces = Property(Entity.typedecl.base_interfaces)
     record_def = Property(Entity.typedecl.record_def)
