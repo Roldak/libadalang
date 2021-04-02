@@ -4498,7 +4498,10 @@ class BaseTypeDecl(BasicDecl):
             )),
         )
 
-    record_def = Property(No(T.BaseRecordDef.entity), dynamic_vars=[origin])
+    record_def = Property(
+        No(T.BaseRecordDef.entity), dynamic_vars=[default_origin()],
+        public=True, doc="Return the RecordDef of this type, if relevant."
+    )
     array_def = Property(No(T.ArrayTypeDef.entity), dynamic_vars=[origin])
 
     @langkit_property(dynamic_vars=[origin])
