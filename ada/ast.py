@@ -2590,7 +2590,7 @@ class Body(BasicDecl):
         """
         env = Var(Entity.children_env.env_parent)
 
-        elements = Var(env.get(Entity.name_symbol))
+        elements = Var(env.get(Entity.name_symbol, categories=noprims))
 
         precise = Var(elements.find(
             lambda sp: And(
@@ -2644,7 +2644,7 @@ class Body(BasicDecl):
         Return the EntryDecl corresponding to this node.
         """
         spec = Var(Entity.cast_or_raise(EntryBody).params)
-        return env.get(Entity.name_symbol).find(
+        return env.get(Entity.name_symbol, categories=noprims).find(
             lambda sp: And(
                 Not(sp.is_null),
                 Not(sp.node == Self),
@@ -2872,7 +2872,9 @@ class Body(BasicDecl):
                     T.ProtectedTypeDecl,
                 )
             ),
-            public_scope.get('__privatepart', lookup=LK.flat).at(0).then(
+            public_scope.get(
+                '__privatepart', lookup=LK.flat, categories=noprims
+            ).at(0).then(
                 lambda pp: pp.children_env, default_val=public_scope
             ),
             public_scope
