@@ -7806,6 +7806,9 @@ class GenericInstantiation(BasicDecl):
                         )
                     ),
 
+                    lambda _=T.GenericInstantiation:
+                    actual_name.xref_no_overloading,
+
                     lambda obj_decl=T.ObjectDecl:
                     pm.actual.assoc.expr.sub_equation
                     & Bind(pm.actual.assoc.expr.type_var, obj_decl.expr_type,
