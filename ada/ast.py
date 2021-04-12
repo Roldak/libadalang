@@ -14185,6 +14185,17 @@ class CompilationUnit(AdaNode):
             )).as_bare_entity
         )
 
+    @langkit_property(return_type=T.CompilationUnit.entity, public=True)
+    def parent_unit():
+        """
+        Return the direct parent unit of this compilation unit, if any.
+        Otherwise return null.
+        """
+        return Self.decl._.node_env._.env_node.then(
+            lambda n:
+            n.enclosing_compilation_unit.as_bare_entity
+        )
+
     @langkit_property(return_type=T.CompilationUnit.entity.array,
                       memoized=True, public=True)
     def imported_units():
@@ -14192,12 +14203,18 @@ class CompilationUnit(AdaNode):
         Return all the compilation units that are directly imported by this
         one. This includes "with"ed units as well as the direct parent unit.
         """
-        return Self.withed_units.concat(
-            Self.decl._.node_env._.env_node.then(
-                lambda n:
-                n.enclosing_compilation_unit.as_bare_entity.singleton
-            )
-        )
+        return Self.withed_units.concat(Self.parent_unit._.singleton)
+
+    @langkit_property(return_type=T.CompilationUnit.entity.array,
+                      memoized=True, public=True)
+    def visible_units():
+        """
+        Return the set of all compilation units that are "with"-visible by
+        this one.
+        """
+        return Self.withed_units.concat(Self.parent_unit.then(
+            lambda p: p.singleton.concat(p.visible_units)
+        ))
 
     @langkit_property(return_type=T.CompilationUnit.entity.array)
     def unit_dependencies_helper(visited=T.CompilationUnit.entity.array,
