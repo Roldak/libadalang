@@ -85,7 +85,10 @@ procedure Nameres is
    Time_Start : Time;
    --  Time at which the app starts, when Args.Time is set
 
-   procedure App_Setup (Context : App_Context; Jobs : App_Job_Context_Array);
+   procedure App_Setup
+     (Context : App_Context;
+      Jobs    : App_Job_Context_Array;
+      Files   : String_Vectors.Vector);
    procedure Job_Setup (Context : App_Job_Context);
    procedure Process_Unit (Context : App_Job_Context; Unit : Analysis_Unit);
    procedure Job_Post_Process (Context : App_Job_Context);
@@ -671,8 +674,13 @@ procedure Nameres is
    -- App_Setup --
    ---------------
 
-   procedure App_Setup (Context : App_Context; Jobs : App_Job_Context_Array) is
+   procedure App_Setup
+     (Context : App_Context;
+      Jobs    : App_Job_Context_Array;
+      Files   : String_Vectors.Vector)
+   is
       pragma Unreferenced (Context);
+      pragma Unreferenced (Files);
    begin
       if Args.Memory.Get then
          GNATCOLL.Memory.Configure (Activate_Monitor => True);
