@@ -252,6 +252,12 @@ package Libadalang.Helpers is
             Help         => "Process the runtime files, and any other"
               & " predefined sources");
 
+         package Ignored_Files is new Parse_Option_List
+           (Parser, Long => "--ignore-files",
+            Arg_Type     => Unbounded_String,
+            Accumulate   => True,
+            Help         => "List of source files not to process");
+
          package Scenario_Vars is new Parse_Option_List
            (Parser, Short => "-X", Long => "--scenario-variable",
             Arg_Type      => Unbounded_String,

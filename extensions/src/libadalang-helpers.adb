@@ -186,7 +186,8 @@ package body Libadalang.Helpers is
             return False;
          else
             for F of Arg_Files loop
-               Files.Append (F);
+               Files.Append (To_Unbounded_String
+                 (+Create_From_Base (+To_String (F)).Full_Name));
             end loop;
             return True;
          end if;
@@ -435,6 +436,21 @@ package body Libadalang.Helpers is
                Abort_App ("--config requires -P");
             end if;
          end if;
+
+         --  Remove ignored files from the list of files to process
+         for Ignored of Args.Ignored_Files.Get loop
+            declare
+               Full_Name : constant Unbounded_String := To_Unbounded_String
+                 (+Create_From_Base (+To_String (Ignored)).Full_Name);
+
+               Index : constant Integer := Files.Find_Index (Full_Name);
+            begin
+               if Index /= String_Vectors.No_Index then
+                  Files.Swap (Index, Files.Last_Index);
+                  Files.Delete_Last;
+               end if;
+            end;
+         end loop;
 
          if Files.Is_Empty then
             Put_Line (Standard_Error, "No source file to process");
