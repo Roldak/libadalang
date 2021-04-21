@@ -5015,7 +5015,8 @@ class BaseTypeDecl(BasicDecl):
             transitive_parent=False
         )
 
-    @langkit_property(return_type=T.inner_env_assoc.array, memoized=True)
+    @langkit_property(return_type=T.inner_env_assoc.array, memoized=True,
+                      memoize_in_populate=True)
     def dottable_subps():
         """
         Return the list of all subprograms that can be called with the dot-
@@ -12914,7 +12915,8 @@ class BaseSubpSpec(BaseFormalParamHolder):
         """
         return Entity.primitive_decl_spec._.get_primitive_subp_tagged_type
 
-    @langkit_property(return_type=BaseTypeDecl.entity.array)
+    @langkit_property(return_type=BaseTypeDecl.entity.array, memoized=True,
+                      memoize_in_populate=True)
     def dottable_subp_of():
         """
         Returns whether the subprogram containing this spec is a subprogram
