@@ -5015,6 +5015,32 @@ class BaseTypeDecl(BasicDecl):
             transitive_parent=False
         )
 
+    @lazy_field(return_type=T.inner_env_assoc.array)
+    def own_dottable_subps():
+        scope = Var(Self.as_bare_entity.declarative_scope)
+        decls = Var(scope._.parent.as_bare_entity._.match(
+            lambda decl=BasePackageDecl:
+            decl.public_part.decls.as_array.concat(
+                decl.private_part._.decls.as_array
+            ),
+            lambda body=PackageBody: body.decls.decls.as_array,
+            lambda _: No(AdaNode.entity.array)
+        ))
+        return decls.filtermap(
+            lambda decl: Let(
+                lambda bd=decl.cast(BasicDecl): T.inner_env_assoc.new(
+                    key=bd.defining_name.name_symbol,
+                    val=bd.node,
+                    metadata=T.Metadata.new(dottable_subp=True)
+                )
+            ),
+
+            lambda decl:
+            decl.cast(BasicDecl)
+                ._.subp_spec_or_null
+                ._.dottable_subp_of.contains(Self.as_bare_entity)
+        )
+
     @langkit_property(return_type=T.inner_env_assoc.array, memoized=True,
                       memoize_in_populate=True)
     def dottable_subps():
@@ -5023,39 +5049,23 @@ class BaseTypeDecl(BasicDecl):
         notation on values of this type. We look for them in the public part,
         private part and body part of the package this type is declared in.
         """
-        scope = Var(Entity.declarative_scope)
-        pkg = Var(
-            scope._.parent.cast(PackageBody).then(
-                lambda body: imprecise_fallback.bind(
-                    False,
-                    body.as_entity.previous_part
-                ).cast(BasePackageDecl),
-                default_val=scope._.parent.cast(BasePackageDecl).as_entity
-            )
-        )
-        return If(
-            pkg.is_null,
-            No(T.inner_env_assoc.array),
+        return Self.own_dottable_subps.concat(
+            Self.as_bare_entity.declarative_scope._.parent.as_bare_entity
+            .cast(BasePackageDecl).then(
+                lambda pkg: pkg.body_part._.decls.decls.filtermap(
+                    lambda decl: Let(
+                        lambda bd=decl.cast(BasicDecl): T.inner_env_assoc.new(
+                            key=bd.defining_name.name_symbol,
+                            val=bd.node,
+                            metadata=T.Metadata.new(dottable_subp=True)
+                        )
+                    ),
 
-            Array([
-                pkg.public_part.cast(DeclarativePart),
-                pkg.private_part.cast(DeclarativePart),
-                pkg.body_part._.decls
-            ]).mapcat(
-                lambda dp: dp._.decls.as_array
-            ).filtermap(
-                lambda decl: Let(
-                    lambda bd=decl.cast(BasicDecl): T.inner_env_assoc.new(
-                        key=bd.defining_name.name_symbol,
-                        val=bd.node,
-                        metadata=T.Metadata.new(dottable_subp=True)
-                    )
-                ),
-
-                lambda decl:
-                decl.cast(BasicDecl)
-                ._.subp_spec_or_null
-                ._.dottable_subp_of.contains(Entity)
+                    lambda decl:
+                    decl.cast(BasicDecl)
+                        ._.subp_spec_or_null
+                        ._.dottable_subp_of.contains(Self.as_bare_entity)
+                )
             )
         )
 
