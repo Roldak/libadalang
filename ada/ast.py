@@ -1297,12 +1297,36 @@ class BasicDecl(AdaNode):
                       T.GenericPackageDecl, T.GenericPackageInstantiation,
                       T.GenericSubpInstantiation, T.GenericSubpDecl,
                       T.SubpBody),
+
             Self.as_bare_entity.defining_name.name.cast(T.DottedName).then(
-                lambda dn:
-                Self.get_unit(dn.prefix.as_symbol_array,
-                              UnitSpecification,
-                              load_if_needed=True).then(lambda _: False)
+                lambda dn: Self.get_unit(
+                    dn.prefix.as_symbol_array,
+                    UnitSpecification,
+                    load_if_needed=True
+                ).then(lambda _: False)
             ),
+            False
+        )
+
+    @langkit_property()
+    def populate_body_unit():
+        """
+        For library-level subprogram declarations, we also want
+        to populate the unit containing the body, so that the parent
+        package always has the same two values for this env entry of
+        this subprogram, no matter if we started by populating the
+        declaration or the body. This has to be done since the named
+        envs transition, as the body unit cannot conditionally add
+        itself to the parent env depending on whether the declaration
+        unit is present or not, since this is state-dependent.
+        """
+        return If(
+            Self.is_library_item,
+            Self.get_unit(
+                Self.as_bare_entity.defining_name.name.as_symbol_array,
+                UnitBody,
+                load_if_needed=True
+            ).then(lambda _: False),
             False
         )
 
@@ -6919,7 +6943,11 @@ class BasicSubpDecl(BasicDecl):
             Self.top_level_use_type_clauses,
             through=T.Name.name_designated_type_env,
             cond=Self.parent.is_a(T.LibraryItem, T.Subunit)
-        )
+        ),
+
+        handle_children(),
+
+        do(Self.populate_body_unit)
     )
 
 
@@ -8543,7 +8571,11 @@ class GenericSubpDecl(GenericDecl):
             Self.top_level_use_type_clauses,
             through=T.Name.name_designated_type_env,
             cond=Self.parent.is_a(T.LibraryItem, T.Subunit)
-        )
+        ),
+
+        handle_children(),
+
+        do(Self.populate_body_unit)
     )
 
     decl = Property(Entity.subp_decl)
