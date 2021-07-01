@@ -8042,24 +8042,31 @@ class GenericPackageInstantiation(GenericInstantiation):
         visibility on the formals.
         """
         dp = Var(Entity.designated_package)
-        return Array([
-            If(
-                Self.is_formal | inst_from_formal,
-                Array([dp.children_env, dp.parent.children_env]).env_group(),
-                dp.children_env
-            ),
-            # The environment of the instantiation needs to be available,
-            # because library unit generic package instantiations can be
-            # nested, and so need to be available, such as in::
-            #
-            #     --  a.ads
-            #     package A is new Gen_A;
-            #
-            #     --  a-b.ads
-            #     package A.B is new A.Gen_B;
-            #
-            Entity.children_env
-        ]).env_group()
+        return If(
+            dp.is_null,
+            EmptyEnv,
+            Array([
+                If(
+                    Self.is_formal | inst_from_formal,
+                    Array([
+                        dp.children_env,
+                        dp.parent.children_env
+                    ]).env_group(),
+                    dp.children_env
+                ),
+                # The environment of the instantiation needs to be available,
+                # because library unit generic package instantiations can be
+                # nested, and so need to be available, such as in::
+                #
+                #     --  a.ads
+                #     package A is new Gen_A;
+                #
+                #     --  a-b.ads
+                #     package A.B is new A.Gen_B;
+                #
+                Entity.children_env
+            ]).env_group()
+        )
 
     @langkit_property(return_type=LexicalEnv)
     def defining_env():
